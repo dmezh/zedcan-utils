@@ -25,11 +25,10 @@ fn main() -> Result<()> {
     .map(|n| std::fs::File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
     .collect();
 
-    for (i, bit) in id_bits.iter().enumerate() {
-        if i == 11 { break };
+    for (i, bit) in id_bits.iter().take(11).enumerate() {
         let bit = bit.as_u16();
 
-        msgid_files[i].write_all(&bit.to_string().as_bytes())?;
+        msgid_files[i].write_all(bit.to_string().as_bytes())?;
     }
 
     // ok, now let's make a rising edge on the input trigger.
