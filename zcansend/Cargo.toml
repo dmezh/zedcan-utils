@@ -1,5 +1,5 @@
 [package]
-name = "zcansend"
+name = "zcanhello"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.66"
-gpio = "0.4.1"
 lazy_static = "1.4.0"
