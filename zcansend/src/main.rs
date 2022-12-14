@@ -2,16 +2,16 @@ use std::fs::File;
 use std::io::Write;
 
 use anyhow::Result;
-use bitvec::{macros::internal::funty::{Fundamental}, prelude::*, index::BitIdx, view::BitViewSized};
+use bitvec::{macros::internal::funty::Fundamental, prelude::*};
 use clap::Parser;
 use clap_num::maybe_hex;
 
 const BASE_GPIO_PATH: &str = "/sys/class/gpio/gpio";
 
 const TRIGGER_BASE: u32 = 1015;
-const ID_BASE:      u32 = 940;
-const DLC_BASE:     u32 = 936;
-const DATA_BASE:    u32 = 951;
+const ID_BASE: u32 = 940;
+const DLC_BASE: u32 = 936;
+const DATA_BASE: u32 = 951;
 
 struct GpioHandles {
     trigger: File,
@@ -24,14 +24,14 @@ impl GpioHandles {
     fn do_trigger(&mut self) -> Result<()> {
         self.trigger.write_all(b"0")?;
         self.trigger.write_all(b"1")?;
-    
+
         Ok(())
     }
-    
+
     fn write_id(&mut self, id_bits: &BitSlice<impl BitStore>) -> Result<()> {
         for (i, bit) in id_bits.iter().take(11).enumerate() {
             let bit = bit.as_u8();
-    
+
             self.msg_id[i].write_all(bit.to_string().as_bytes())?;
         }
 
@@ -66,7 +66,7 @@ impl GpioHandles {
 
             println!("upper: {i}");
 
-            self.data[i+32].write_all(bit.to_string().as_bytes())?;
+            self.data[i + 32].write_all(bit.to_string().as_bytes())?;
         }
 
         Ok(())
@@ -86,15 +86,15 @@ fn main() -> Result<()> {
 
     let mut gh = GpioHandles {
         trigger: File::create(format!("{BASE_GPIO_PATH}{TRIGGER_BASE}/value")).unwrap(),
-        msg_id: (ID_BASE..ID_BASE+11)
+        msg_id: (ID_BASE..ID_BASE + 11)
             .into_iter()
             .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
             .collect(),
-        dlc: (DLC_BASE..DLC_BASE+4)
+        dlc: (DLC_BASE..DLC_BASE + 4)
             .into_iter()
             .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
             .collect(),
-        data: (DATA_BASE..DATA_BASE+64)
+        data: (DATA_BASE..DATA_BASE + 64)
             .into_iter()
             .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
             .collect(),
