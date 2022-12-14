@@ -61,12 +61,12 @@ impl GpioHandles {
     }
 
     fn write_data_upper(&mut self, bits: &BitSlice<impl BitStore>) -> Result<()> {
-        for (i, bit) in bits.iter().skip(32).take(32).enumerate() {
+        for (i, bit) in bits.iter().take(32).enumerate() {
             let bit = bit.as_u8();
 
             println!("upper: {i}");
 
-            self.data[i].write_all(bit.to_string().as_bytes())?;
+            self.data[i+32].write_all(bit.to_string().as_bytes())?;
         }
 
         Ok(())
@@ -100,10 +100,12 @@ fn main() -> Result<()> {
             .collect(),
     };
 
+    println!("size of data iter: {}", gh.data.len());
+
     let id_bits = args.id.view_bits::<Lsb0>();
     let dlc_bits = args.dlc.view_bits::<Lsb0>();
-    let data_bits_lower = (args.data & 0xFFFF_FFFF) as u32;
-    let data_bits_upper = ((args.data >> 32) & 0xFFFF_FFFF) as u32;
+    let data_bits_upper = (args.data & 0xFFFF_FFFF) as u32;
+    let data_bits_lower = ((args.data >> 32) & 0xFFFF_FFFF) as u32;
 
     println!("lower: {data_bits_lower} upper: {data_bits_upper}");
 
