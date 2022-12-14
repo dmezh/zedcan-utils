@@ -75,6 +75,7 @@ impl GpioHandles {
 
 #[derive(Parser)]
 struct Args {
+    #[clap(value_parser=maybe_hex::<u16>)]
     id: u16,
     dlc: u8,
     #[clap(value_parser=maybe_hex::<u64>)]
