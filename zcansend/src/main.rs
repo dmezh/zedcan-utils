@@ -1,6 +1,7 @@
 use std::io::Write;
 
 use anyhow::Result;
+use clap::Parser;
 use bitvec::{prelude::*, macros::internal::funty::Fundamental};
 use lazy_static::lazy_static;
 
@@ -9,9 +10,15 @@ lazy_static! {
     static ref MSGID_NUMS: Vec<u32> = (940..=950).collect();
 }
 
+#[derive(Parser)]
+struct Args {
+    id: u16
+}
+
 fn main() -> Result<()> {
-    let id: u16 = 0x010;
-    let id_bits = id.view_bits::<Lsb0>();
+    let args = Args::parse();
+
+    let id_bits = args.id.view_bits::<Lsb0>();
 
     let mut msgid_files: Vec<std::fs::File> = MSGID_NUMS
     .iter()
