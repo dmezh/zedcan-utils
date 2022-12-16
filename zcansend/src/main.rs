@@ -52,8 +52,6 @@ impl GpioHandles {
         for (i, bit) in bits.iter().take(32).enumerate() {
             let bit = bit.as_u8();
 
-            println!("lower: {i}");
-
             self.data[i].write_all(bit.to_string().as_bytes())?;
         }
 
@@ -63,8 +61,6 @@ impl GpioHandles {
     fn write_data_upper(&mut self, bits: &BitSlice<impl BitStore>) -> Result<()> {
         for (i, bit) in bits.iter().take(32).enumerate() {
             let bit = bit.as_u8();
-
-            println!("upper: {i}");
 
             self.data[i + 32].write_all(bit.to_string().as_bytes())?;
         }
@@ -85,32 +81,30 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
 
+    let value_path = |n: u32| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap();
+
     let mut gh = GpioHandles {
         trigger: File::create(format!("{BASE_GPIO_PATH}{TRIGGER_BASE}/value")).unwrap(),
         msg_id: (ID_BASE..ID_BASE + 11)
             .into_iter()
-            .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
+            .map(value_path)
             .collect(),
         dlc: (DLC_BASE..DLC_BASE + 4)
             .into_iter()
-            .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
+            .map(value_path)
             .collect(),
         data: (DATA_BASE..DATA_BASE + 64)
             .into_iter()
-            .map(|n| File::create(format!("{BASE_GPIO_PATH}{n}/value")).unwrap())
+            .map(value_path)
             .collect(),
     };
 
-    println!("size of data iter: {}", gh.data.len());
-
     let id_bits = args.id.view_bits::<Lsb0>();
     let dlc_bits = args.dlc.view_bits::<Lsb0>();
-    let data_bits_upper = (args.data & 0xFFFF_FFFF) as u32;
-    let data_bits_lower = ((args.data >> 32) & 0xFFFF_FFFF) as u32;
-
-    println!("lower: {data_bits_lower} upper: {data_bits_upper}");
 
     // we can't use view_bits for a 64 bit integral on a 32 bit platform, apparently
+    let data_bits_upper = (args.data & 0xFFFF_FFFF) as u32;
+    let data_bits_lower = ((args.data >> 32) & 0xFFFF_FFFF) as u32;
 
     gh.write_id(id_bits)?;
     gh.write_dlc(dlc_bits)?;
